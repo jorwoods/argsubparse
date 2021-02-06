@@ -6,7 +6,8 @@ from typing import Callable, Mapping, Sequence
 
 def create_subparser(parser: argparse.ArgumentParser, func: Callable,
                      short_options: Mapping[str, str],
-                     skip_args: Sequence = list(('args', 'kwargs'))
+                     skip_args: Sequence = list(),
+                     subparser_name = None,
                      ) -> argparse.ArgumentParser:
     '''
     Given an existing argparse ArgumentParser, and a function to be exposed as
@@ -20,12 +21,13 @@ def create_subparser(parser: argparse.ArgumentParser, func: Callable,
                      if isinstance(action, argparse._SubParsersAction)][0]
     except IndexError:
         subparser = parser.add_subparsers()
-    function_parser = subparser.add_parser(func.__name__)
+    function_parser = subparser.add_parser(subparser_name or func.__name__)
 
-    signature = inspect.signature(func)
     existing_actions = set(action.dest for action in parser._actions)
+    existing_actions = existing_actions.union(('args', 'kwargs'))
     skips = existing_actions.union(skip_args)
 
+    signature = inspect.signature(func)
     for k, v in signature.parameters:  
         arg_params = dict()
         if k in skips:
