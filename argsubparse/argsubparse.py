@@ -1,13 +1,13 @@
 import argparse
 import inspect
 
-from typing import Callable, Mapping, Sequence
+from typing import Callable, Mapping, Optional, Sequence
 
 
 def create_subparser(parser: argparse.ArgumentParser, func: Callable,
                      short_options: Mapping[str, str],
                      skip_args: Sequence = list(),
-                     subparser_name = None,
+                     subparser_name: Optional[str] = None,
                      ) -> argparse.ArgumentParser:
     '''
     Given an existing argparse ArgumentParser, and a function to be exposed as
@@ -15,6 +15,20 @@ def create_subparser(parser: argparse.ArgumentParser, func: Callable,
     and build a subparser for it. The intention being that it should reduce
     duplication of argument declaration while making use of tools existing
     in the standard library.
+
+    Parameters
+    --------------
+
+    parser: An existing argparse.ArgumentParser instance
+
+    func: A function that you wish to add as a subparser for access from
+    commandline
+
+    skip_args: A Sequence of arguments to not build flags and options
+    for. args and kwargs are always skipped.
+
+    subparser_name: Optionally a name to override the function name from
+    command line.
     '''
     try:
         subparser = [action for action in parser._actions
@@ -28,7 +42,7 @@ def create_subparser(parser: argparse.ArgumentParser, func: Callable,
     skips = existing_actions.union(skip_args)
 
     signature = inspect.signature(func)
-    for k, v in signature.parameters:  
+    for k, v in signature.parameters:
         arg_params = dict()
         if k in skips:
             continue
