@@ -5,7 +5,7 @@ from typing import Callable, Mapping, Optional, Sequence
 
 
 def create_subparser(parser: argparse.ArgumentParser, func: Callable,
-                     short_options: Mapping[str, str],
+                     short_options: Mapping[str, str] = None,
                      skip_args: Sequence = list(),
                      subparser_name: Optional[str] = None,
                      ) -> argparse.ArgumentParser:
@@ -42,7 +42,7 @@ def create_subparser(parser: argparse.ArgumentParser, func: Callable,
     skips = existing_actions.union(skip_args)
 
     signature = inspect.signature(func)
-    for k, v in signature.parameters:
+    for k, v in signature.parameters.items():
         arg_params = dict()
         if k in skips:
             continue
