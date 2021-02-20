@@ -1,14 +1,17 @@
 import argparse
 import inspect
 
-from typing import Callable, Mapping, Optional, Sequence
+from typing import Callable, Mapping, Optional, Sequence, Set
 
 
-def create_subparser(parser: argparse.ArgumentParser, func: Callable,
-                     short_options: Mapping[str, str] = None,
-                     skip_args: Sequence = list(),
-                     subparser_name: Optional[str] = None,
-                     ) -> argparse.ArgumentParser:
+def create_subparser(
+    parser: argparse.ArgumentParser,
+    func: Callable,
+    short_options: Mapping[str, str] = dict(),
+    skip_args: Sequence = list(),
+    subparser_name: Optional[str] = None,
+    parents: Set[argparse.ArgumentParser] = set(),
+) -> argparse.ArgumentParser:
     '''
     Given an existing argparse ArgumentParser, and a function to be exposed as
     a command line interface, this function will inspect the passed function
@@ -24,27 +27,29 @@ def create_subparser(parser: argparse.ArgumentParser, func: Callable,
     func: A function that you wish to add as a subparser for access from
     commandline
 
+    short_options: A Mapping of argument name to the short option names.
+
     skip_args: A Sequence of arguments to not build flags and options
     for. args and kwargs are always skipped.
 
     subparser_name: Optionally a name to override the function name from
     command line.
+
+    parents: A Set of ArgumentParser classes to add the arguments to the
+    subparser. Adds the parser (first argument) as a parent automatically.
     '''
     try:
         subparser = [action for action in parser._actions
                      if isinstance(action, argparse._SubParsersAction)][0]
     except IndexError:
         subparser = parser.add_subparsers()
-    function_parser = subparser.add_parser(subparser_name or func.__name__)
-
-    existing_actions = set(action.dest for action in parser._actions)
-    existing_actions = existing_actions.union(('args', 'kwargs'))
-    skips = existing_actions.union(skip_args)
+    function_parser = subparser.add_parser(subparser_name or func.__name__,
+                                           parents=parents)
 
     signature = inspect.signature(func)
     for k, v in signature.parameters.items():
         arg_params = dict()
-        if k in skips:
+        if k in skip_args:
             continue
         if v.default is inspect._empty:
             arg_name = (k, )
@@ -62,7 +67,7 @@ def create_subparser(parser: argparse.ArgumentParser, func: Callable,
             arg_params['type'] = v.annotation
         function_parser.add_argument(*arg_name, **arg_params)
 
-    function_parser.usage = func.__doc__
+    function_parser.usage = '\n'.join([parser.usage, func.__doc__])
     function_parser.set_defaults(func=func)
 
     return function_parser
