@@ -46,6 +46,12 @@ def create_subparser(
     function_parser = subparser.add_parser(subparser_name or func.__name__,
                                            parents=parents)
 
+    skip_args = set(skip_args)
+    for parent in parents:
+        for action in parent._actions:
+            if isinstance(action, argparse._StoreAction):
+                skip_args.add(action)
+
     signature = inspect.signature(func)
     for k, v in signature.parameters.items():
         arg_params = dict()
