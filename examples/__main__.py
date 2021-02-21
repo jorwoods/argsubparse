@@ -8,11 +8,18 @@ def echo(data, *args, **kwargs):
     '''
     print(data)
 
+
+def sign_in(server, username, password):
+    print('Signed into {} as {}'.format(
+        server, username
+    ))
+
 def main():
     parser = argparse.ArgumentParser('argsubparse_example')
     parser.add_subparsers(required=True)
 
-    group = parser.add_argument_group('Authentication', )
+    auth_args = argparse.ArgumentParser(add_help=False)
+    group = auth_args.add_argument_group('Authentication', )
     tokens = group.add_argument_group('Token Authentication')
     tokens.add_argument('--token_name')
     tokens.add_argument('--token_secret')
@@ -22,8 +29,10 @@ def main():
     upw_auth.add_argument('--password')
 
     create_subparser(parser, echo)
+    create_subparser(parser, sign_in, parents={auth_args})
 
     parsed = parser.parse_args()
     parsed.func(**vars(parsed))
+
 
 main()

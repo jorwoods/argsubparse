@@ -43,14 +43,14 @@ def create_subparser(
                      if isinstance(action, argparse._SubParsersAction)][0]
     except IndexError:
         subparser = parser.add_subparsers()
-    function_parser = subparser.add_parser(subparser_name or func.__name__,
-                                           parents=parents)
+    name = subparser_name or func.__name__
+    function_parser = subparser.add_parser(name, parents=parents)
 
     skip_args = set(skip_args)
     for parent in parents:
         for action in parent._actions:
             if isinstance(action, argparse._StoreAction):
-                skip_args.add(action)
+                skip_args.add(action.dest)
 
     signature = inspect.signature(func)
     for k, v in signature.parameters.items():
@@ -73,7 +73,10 @@ def create_subparser(
             arg_params['type'] = v.annotation
         function_parser.add_argument(*arg_name, **arg_params)
 
-    function_parser.usage = '\n'.join([parser.usage, func.__doc__])
+    usage = [parser.usage, func.__doc__]
+    usage += [u for u in parents.__doc__ if u is not None]
+    usage = [u for u in usage if u is not None]
+    function_parser.usage = '\n'.join(usage)
     function_parser.set_defaults(func=func)
 
     return function_parser
