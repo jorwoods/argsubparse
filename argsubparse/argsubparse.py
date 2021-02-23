@@ -8,7 +8,7 @@ def create_subparser(
     parser: argparse.ArgumentParser,
     func: Callable,
     short_options: Mapping[str, str] = dict(),
-    skip_args: Sequence = list(),
+    skip_args: Sequence = list(('args', 'kwargs')),
     subparser_name: Optional[str] = None,
     parents: Set[argparse.ArgumentParser] = set(),
 ) -> argparse.ArgumentParser:
