@@ -12,7 +12,7 @@ with open((this_directory / 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='argsubparse',
-    version='0.0.3',
+    version='0.0.4',
     author='Jordan Woods',
     author_email='jor.e.woods@gmail.com',
     url='https://github.com/jorwoods/argsubparse',
