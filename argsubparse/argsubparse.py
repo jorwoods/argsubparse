@@ -43,6 +43,10 @@ def create_subparser(
                      if isinstance(action, argparse._SubParsersAction)][0]
     except IndexError:
         subparser = parser.add_subparsers()
+
+    if subparser.dest == '==SUPPRESS==':
+        subparser.dest = 'command'
+
     name = subparser_name or func.__name__
     function_parser = subparser.add_parser(name, parents=parents)
 
@@ -78,7 +82,8 @@ def create_subparser(
         function_parser.add_argument(*arg_name, **arg_params)
 
     usage = [parser.usage, func.__doc__]
-    usage += [u for u in parents.__doc__ if u is not None]
+
+    usage += [p.usage for p in parents]
     usage = [u for u in usage if u is not None]
     function_parser.usage = '\n'.join(usage)
     function_parser.set_defaults(func=func)
