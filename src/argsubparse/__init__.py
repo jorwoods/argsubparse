@@ -1,1 +1,1 @@
-from .argsubparse import create_subparser
+from .argsubparse import create_subparser  # noqa: F401
