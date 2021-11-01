@@ -8,7 +8,7 @@ def create_subparser(
     parser: argparse.ArgumentParser,
     func: Callable,
     short_options: Mapping[str, str] = dict(),
-    skip_args: Sequence = list(('args', 'kwargs')),
+    skip_args: Sequence = list(),
     subparser_name: Optional[str] = None,
     parents: Set[argparse.ArgumentParser] = set(),
 ) -> argparse.ArgumentParser:
@@ -30,7 +30,7 @@ def create_subparser(
     short_options: A Mapping of argument name to the short option names.
 
     skip_args: A Sequence of arguments to not build flags and options
-    for. args and kwargs are always skipped.
+    for. Arguments that unpack, like *args, **kwargs, are always skipped..
 
     subparser_name: Optionally a name to override the function name from
     command line.
@@ -63,7 +63,7 @@ def create_subparser(
     signature = inspect.signature(func)
     for k, v in signature.parameters.items():
         arg_params = dict()
-        if k in skip_args:
+        if k in skip_args or str(v).startswith('*'):
             continue
         if v.default is inspect._empty:
             arg_name = (k, )
