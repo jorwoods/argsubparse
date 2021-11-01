@@ -14,6 +14,7 @@ def sign_in(server, username, password):
         server, username
     ))
 
+
 def main():
     parser = argparse.ArgumentParser('argsubparse_example')
     parser.add_subparsers(required=True)

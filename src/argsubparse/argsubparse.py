@@ -12,7 +12,7 @@ def create_subparser(
     subparser_name: Optional[str] = None,
     parents: Set[argparse.ArgumentParser] = set(),
 ) -> argparse.ArgumentParser:
-    '''
+    """
     Given an existing argparse ArgumentParser, and a function to be exposed as
     a command line interface, this function will inspect the passed function
     and build a subparser for it. The intention being that it should reduce
@@ -37,15 +37,18 @@ def create_subparser(
 
     parents: A Set of ArgumentParser classes to add the arguments to the
     subparser. Adds the parser (first argument) as a parent automatically.
-    '''
+    """
     try:
-        subparser = [action for action in parser._actions
-                     if isinstance(action, argparse._SubParsersAction)][0]
+        subparser = [
+            action
+            for action in parser._actions
+            if isinstance(action, argparse._SubParsersAction)
+        ][0]
     except IndexError:
         subparser = parser.add_subparsers()
 
-    if subparser.dest == '==SUPPRESS==':
-        subparser.dest = 'command'
+    if subparser.dest == "==SUPPRESS==":
+        subparser.dest = "command"
 
     name = subparser_name or func.__name__
     function_parser = subparser.add_parser(name, parents=parents)
@@ -63,29 +66,29 @@ def create_subparser(
     signature = inspect.signature(func)
     for k, v in signature.parameters.items():
         arg_params = dict()
-        if k in skip_args or str(v).startswith('*'):
+        if k in skip_args or str(v).startswith("*"):
             continue
         if v.default is inspect._empty:
-            arg_name = (k, )
+            arg_name = (k,)
         else:
-            arg_params['default'] = v.default
+            arg_params["default"] = v.default
             short_option = short_options.get(k)
             if short_option is None:
-                arg_name = (f'--{k}', )
+                arg_name = (f"--{k}",)
             else:
-                if not short_option.startswith('-'):
-                    short_option = f'-{short_option}'
-                arg_name = (short_option, f'--{k}')
+                if not short_option.startswith("-"):
+                    short_option = f"-{short_option}"
+                arg_name = (short_option, f"--{k}")
 
         if v.annotation is not inspect._empty:
-            arg_params['type'] = v.annotation
+            arg_params["type"] = v.annotation
         function_parser.add_argument(*arg_name, **arg_params)
 
     usage = [parser.usage, func.__doc__]
 
     usage += [p.usage for p in parents]
     usage = [u for u in usage if u is not None]
-    function_parser.usage = '\n'.join(usage)
+    function_parser.usage = "\n".join(usage)
     function_parser.set_defaults(func=func)
 
     return function_parser
