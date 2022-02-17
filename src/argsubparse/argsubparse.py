@@ -80,8 +80,6 @@ def create_subparser(
                     short_option = f"-{short_option}"
                 arg_name = (short_option, f"--{k}")
 
-        if v.annotation is not inspect._empty:
-            arg_params["type"] = v.annotation
         function_parser.add_argument(*arg_name, **arg_params)
 
     usage = [parser.usage, func.__doc__]
