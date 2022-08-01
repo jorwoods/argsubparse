@@ -70,6 +70,11 @@ def create_subparser(
             continue
         if v.default is inspect._empty:
             arg_name = (k,)
+        if isinstance(v.annotation, bool):
+            if v.default is not inspect._empty:
+                arg_params["action"] = "store_false" if v.default else "store_true"
+            else:
+                arg_params["action"] = "store_true"
         else:
             arg_params["default"] = v.default
             short_option = short_options.get(k)
