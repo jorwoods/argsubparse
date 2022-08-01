@@ -70,11 +70,6 @@ def create_subparser(
             continue
         if v.default is inspect._empty:
             arg_name = (k,)
-        if isinstance(v.annotation, bool):
-            if v.default is not inspect._empty:
-                arg_params["action"] = "store_false" if v.default else "store_true"
-            else:
-                arg_params["action"] = "store_true"
         else:
             arg_params["default"] = v.default
             short_option = short_options.get(k)
@@ -84,6 +79,12 @@ def create_subparser(
                 if not short_option.startswith("-"):
                     short_option = f"-{short_option}"
                 arg_name = (short_option, f"--{k}")
+
+        if issubclass(v.annotation, bool):
+            if v.default is not inspect._empty:
+                arg_params["action"] = "store_false" if v.default else "store_true"
+            else:
+                arg_params["action"] = "store_true"
 
         function_parser.add_argument(*arg_name, **arg_params)
 
